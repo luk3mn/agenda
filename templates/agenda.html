@@ -1,0 +1,13 @@
+{% extends "model-page.html" %}
+
+<!-- Todo esse conteúdo faz parte do bloco 'content' da agenda-->
+{% block content %}
+    <h2>Agendamentos</h2>
+
+    <ul style="font-size: 18px">
+        <!-- código python -->
+        {% for evento in eventos %} 
+            <li>{{ evento.titulo }} - {{ evento.get_data_evento }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
