@@ -21,9 +21,11 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('agenda/', views.lista_eventos),
+    path('agenda/evento/', views.evento),
+    path('agenda/evento/submit', views.submit_evento), # cria uma rota o submit do form de evento
     # path('', views.index) # uma forma de redirecionar a página inicial chamando uma view que nesse caso tem o nome de 'index' e a funcao index na view fará o redirecionamento da página
     path('', RedirectView.as_view(url='/agenda/')), # uma forma mais direta de redireciona a página inicial para um index
     path('login/', views.login_user),
     path('login/submit', views.submit_login),
-    path('logout/', views.logout_user) # deslogar o usuario
+    path('logout/', views.logout_user), # deslogar o usuario 
 ]
