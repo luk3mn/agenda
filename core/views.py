@@ -53,7 +53,12 @@ def lista_eventos(request):
 
 @login_required(login_url='/login/')
 def evento(request):
-    return render(request, 'evento.html')
+    id_evento = request.GET.get('id')
+    dados = {}
+    if id_evento: # se tiver o id_evento
+        # passa o evento
+        dados['evento'] = Evento.objects.get(id=id_evento) 
+    return render(request, 'evento.html', dados)
 
 @login_required(login_url='/login/')
 def submit_evento(request):
@@ -62,10 +67,29 @@ def submit_evento(request):
         data_evento = request.POST.get('data_evento') # recebe a data do evento do form pelo metodo POST
         descricao = request.POST.get('descricao') # recebe a descricao do form pelo metodo POST
         usuario = request.user # pega o usuario que está criando o evento
-
-        # Inseri os dados do evnto no banco de dados a partir do Models do app 'core'
-        Evento.objects.create(titulo=titulo,
-                              data_evento=data_evento,
-                              descricao=descricao,
-                              usuario=usuario)
+        id_evento = request.POST.get('id_evento')
+        if id_evento:
+            evento = Evento.objects.get(id=id_evento)
+            if evento.usuario == usuario:
+                evento.titulo = titulo
+                evento.descricao = descricao
+                evento.data_evento = data_evento
+                evento.save()
+            # Evento.objects.filter(id=id_evento).update(titulo=titulo,
+                                                    #    data_evento=data_evento,
+                                                    #    descricao=descricao)
+        else:
+            # Inseri os dados do evnto no banco de dados a partir do Models do app 'core'
+            Evento.objects.create(titulo=titulo,
+                                data_evento=data_evento,
+                                descricao=descricao,
+                                usuario=usuario)
     return redirect('/')
+
+@login_required(login_url='/login/') # tem que está logado
+def delete_evento(request, id_evento):
+    usuario = request.user
+    evento = Evento.objects.get(id=id_evento) # pega pelo 'id'
+    if usuario == evento.usuario: # valida se o evento pertemce ao usuário logado
+        evento.delete() # aplica a exclusão com o 'delete()
+    return redirect('/') # redireciona para a página principal

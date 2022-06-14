@@ -19,3 +19,6 @@ class Evento(models.Model):
     # Função para melhorar a exibição das datas e horas
     def get_data_evento(self):
         return self.data_evento.strftime('%d/%m/%Y %H:%M Hrs')
+
+    def get_data_input_evento(self):
+        return self.data_evento.strftime('%Y-%m-%dT%H:%M')
