@@ -1,5 +1,6 @@
 from email import message
-import re
+# import re
+from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
 from pkg_resources import require
 from requests import request
@@ -7,6 +8,8 @@ from core.models import Evento
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from datetime import datetime, timedelta
+from django.http.response import Http404, JsonResponse
 
 # Create your views here.
 
@@ -41,7 +44,9 @@ def submit_login(request):
 # Funçõa que vai renderiar a página HTML
 def lista_eventos(request):
     usuario = request.user # pega o usuário que está enviando a requisição
-    evento = Evento.objects.filter(usuario=usuario) # Mesma coisa do 'all' porém está sendo passado um filtro
+    data_atual = datetime.now() - timedelta(hours=1)
+    evento = Evento.objects.filter(usuario=usuario,
+                                   data_evento__gt=data_atual) # Mesma coisa do 'all' porém está sendo passado um filtro
     # evento = Evento.objects.get(id=1) # pega apenas um registro do banco
     # evento = Evento.objects.all() # pega todos os registros do banco
     dados = {'eventos':evento} # dicionario
@@ -89,7 +94,18 @@ def submit_evento(request):
 @login_required(login_url='/login/') # tem que está logado
 def delete_evento(request, id_evento):
     usuario = request.user
-    evento = Evento.objects.get(id=id_evento) # pega pelo 'id'
+    try:    
+        evento = Evento.objects.get(id=id_evento) # pega pelo 'id'
+    except Exception:
+        raise Http404()
     if usuario == evento.usuario: # valida se o evento pertemce ao usuário logado
         evento.delete() # aplica a exclusão com o 'delete()
+    else:
+        raise Http404()
     return redirect('/') # redireciona para a página principal
+
+@login_required(login_url='/login/') # tem que está logado
+def json_lista_evento(request, id_usuario):
+    usuario = User.objects.get(id=id_usuario) # pega o usuário que está enviando a requisição
+    evento = Evento.objects.filter(usuario=usuario).values('id', 'titulo') # Mesma coisa do 'all' porém está sendo passado um filtro
+    return JsonResponse(list(evento), safe=False)
